@@ -1,0 +1,1 @@
+# PharmaGuard — src package root

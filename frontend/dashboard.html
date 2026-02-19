@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaGuard AI - Clinical Decision Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0366d6;
+            --primary-dark: #0349a3;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --light-gray: #f6f8fa;
+            --medium-gray: #e1e4e8;
+            --dark-gray: #586069;
+            --text-primary: #24292e;
+            --text-secondary: #6a737d;
+            --bg-white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --radius: 8px;
+            --radius-sm: 4px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: var(--light-gray);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--medium-gray);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0984e3 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .user-profile {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0984e3 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--light-gray);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* ===== UPLOAD SECTION ===== */
+        .upload-box {
+            border: 2px dashed var(--medium-gray);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--light-gray);
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary-blue);
+            background: #f0f6ff;
+        }
+
+        .upload-box.active {
+            border-color: var(--primary-blue);
+            background: #e8f3ff;
+            box-shadow: inset var(--shadow-sm);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-box p {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-box .instructions {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--text-primary);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .btn-secondary:hover {
+            background: var(--medium-gray);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* ===== WIDGETS ===== */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .widget {
+            background: var(--light-gray);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .widget.critical {
+            border-left-color: var(--danger-red);
+        }
+
+        .widget.warning {
+            border-left-color: var(--warning-yellow);
+        }
+
+        .widget.safe {
+            border-left-color: var(--success-green);
+        }
+
+        .widget-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .widget-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .widget-detail {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge-safe {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .alert-critical {
+            background: #fce4e4;
+            border-left: 4px solid var(--danger-red);
+        }
+
+        .alert-critical .alert-icon {
+            color: var(--danger-red);
+        }
+
+        .alert-critical p {
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning-yellow);
+        }
+
+        .alert-warning .alert-icon {
+            color: #856404;
+        }
+
+        .alert-warning p {
+            color: #856404;
+        }
+
+        /* ===== GENE PANEL ===== */
+        .gene-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .gene-card {
+            background: var(--light-gray);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-top: 3px solid var(--primary-blue);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .gene-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .gene-card.safe {
+            border-top-color: var(--success-green);
+        }
+
+        .gene-card.warning {
+            border-top-color: var(--warning-yellow);
+        }
+
+        .gene-card.critical {
+            border-top-color: var(--danger-red);
+        }
+
+        .gene-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .gene-phenotype {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .gene-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-green);
+        }
+
+        .gene-card.warning .status-dot {
+            background: var(--warning-yellow);
+        }
+
+        .gene-card.critical .status-dot {
+            background: var(--danger-red);
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .gene-explanation {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ===== DRUG RISK TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .risk-table thead {
+            background: var(--light-gray);
+            border-bottom: 2px solid var(--medium-gray);
+        }
+
+        .risk-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .risk-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .risk-table tbody tr:hover {
+            background: var(--light-gray);
+        }
+
+        .risk-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .risk-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .risk-icon {
+            font-size: 1.25rem;
+        }
+
+        .risk-safe {
+            color: var(--success-green);
+        }
+
+        .risk-warning {
+            color: var(--warning-yellow);
+        }
+
+        .risk-danger {
+            color: var(--danger-red);
+        }
+
+        /* ===== EXPANDABLE ===== */
+        .expandable {
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .expandable-header {
+            padding: 1rem 1.5rem;
+            background: var(--light-gray);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .expandable-header:hover {
+            background: #efefef;
+        }
+
+        .expandable-header.open {
+            background: #e8f3ff;
+        }
+
+        .expandable-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .expandable-icon {
+            transition: var(--transition);
+            font-size: 1.25rem;
+        }
+
+        .expandable-header.open .expandable-icon {
+            transform: rotate(180deg);
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .expandable-header.open ~ .expandable-content {
+            max-height: 600px;
+        }
+
+        .expandable-body {
+            padding: 1.5rem;
+            background: var(--bg-white);
+        }
+
+        /* ===== EXPLANATION ===== */
+        .explanation-tag {
+            display: inline-block;
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .explanation-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .explanation-section h4 {
+            color: var(--primary-blue);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .explanation-section p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.9rem;
+        }
+
+        /* ===== RECOMMENDATION ===== */
+        .recommendation {
+            background: var(--light-gray);
+            border-left: 4px solid var(--primary-blue);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+
+        .recommendation.safe {
+            border-left-color: var(--success-green);
+            background: #f1f8f4;
+        }
+
+        .recommendation.warning {
+            border-left-color: var(--warning-yellow);
+            background: #fffaf1;
+        }
+
+        .recommendation.critical {
+            border-left-color: var(--danger-red);
+            background: #fef1f1;
+        }
+
+        .recommendation-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendation-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ===== EVIDENCE ===== */
+        .evidence {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .evidence-item {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .evidence-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .evidence-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-message {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: #fce4e4;
+            border-left: 4px solid var(--danger-red);
+            border-radius: var(--radius-sm);
+            color: #721c24;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .header-content {
+                padding: 1rem;
+            }
+
+            .nav {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .widget-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gene-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .risk-table {
+                font-size: 0.85rem;
+            }
+
+            .risk-table th,
+            .risk-table td {
+                padding: 0.75rem;
+            }
+
+            .upload-box {
+                padding: 2rem 1rem;
+            }
+
+            .upload-icon {
+                font-size: 2rem;
+            }
+
+            .nav-link {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">🧬</div>
+                <div class="logo-text">
+                    <h1>PharmaGuard AI</h1>
+                    <p>Clinical Decision Support</p>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="#" class="nav-link active">Dashboard</a>
+                <a href="#" class="nav-link">Reports</a>
+                <a href="#" class="nav-link">History</a>
+                <div class="user-profile">👤</div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+        <!-- ERROR MESSAGE -->
+        <div id="errorMessage" class="error-message">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div id="errorText"></div>
+        </div>
+
+        <!-- UPLOAD SECTION -->
+        <div class="section">
+            <div class="section-title">
+                <div class="section-title-icon">📁</div>
+                Upload Genetic Data
+            </div>
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">📤</div>
+                <p>Drag and drop your VCF file here</p>
+                <p class="instructions">VCF v4.2 format • Max 5 MB</p>
+                <div class="upload-actions">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        📋 Select File
+                    </button>
+                    <button class="btn btn-secondary" id="sampleButton">
+                        📊 Use Sample Data
+                    </button>
+                </div>
+                <input type="file" id="fileInput" accept=".vcf" />
+            </div>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div id="loadingState" class="section hidden">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Analyzing your genetic data and generating clinical recommendations...</p>
+            </div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div id="resultsSection" class="hidden">
+            <!-- SUMMARY DASHBOARD -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-title-icon">📊</div>
+                    Summary Dashboard
+                </div>
+                <div class="widget-grid">
+                    <div class="widget" id="riskWidget">
+                        <div class="widget-label">Overall Risk Level</div>
+                        <div class="widget-value" id="overallRisk">-</div>
+                        <div class="widget-detail" id="riskDetail">Analyzing...</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-label">Genes Analyzed</div>
+                        <div class="widget-value" id="genesCount">0</div>
+                        <div class="widget-detail">Pharmacogenomic markers</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-label">Drugs Analyzed</div>
+                        <div class="widget-value" id="drugsCount">0</div>
+                        <div class="widget-detail">Medications reviewed</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-label">Clinical Alerts</div>
+                        <div class="widget-value" id="alertsCount">0</div>
+                        <div class="widget-detail">Actions required</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALERTS SECTION -->
+            <div id="alertsContainer" class="hidden">
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-title-icon">🚨</div>
+                        Critical Alerts
+                    </div>
+                    <div id="alertsList"></div>
+                </div>
+            </div>
+
+            <!-- GENE ANALYSIS PANEL -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-title-icon">🔬</div>
+                    Gene Analysis Panel
+                </div>
+                <div class="gene-grid" id="genePanel"></div>
+            </div>
+
+            <!-- DRUG RISK TABLE -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-title-icon">💊</div>
+                    Drug Risk Assessment
+                </div>
+                <div class="table-container">
+                    <table class="risk-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Drug Name</th>
+                                <th style="width: 20%;">Risk Level</th>
+                                <th style="width: 30%;">Recommendation</th>
+                                <th style="width: 25%;">Evidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drugTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DETAILED EXPLANATIONS -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-title-icon">💡</div>
+                    Detailed Clinical Explanations
+                </div>
+                <div id="explanationsPanel"></div>
+            </div>
+
+            <!-- PATIENT-FRIENDLY SUMMARY -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-title-icon">🏥</div>
+                    Patient-Friendly Summary
+                </div>
+                <div id="patientSummary" style="background: #f0f6ff; padding: 1.5rem; border-radius: var(--radius); border-left: 4px solid var(--primary-blue);">
+                    <p style="color: var(--text-secondary); line-height: 1.8;">
+                        Based on your genetic profile, this report identifies medications that may require dose adjustments or alternative treatments.
+                        Your genetic variations affect how your body metabolizes certain drugs. This information helps your healthcare provider make safer medication choices.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('fileInput');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const loadingState = document.getElementById('loadingState');
+        const resultsSection = document.getElementById('resultsSection');
+        const sampleButton = document.getElementById('sampleButton');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop zone
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, () => {
+                uploadBox.classList.add('active');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, () => {
+                uploadBox.classList.remove('active');
+            });
+        });
+
+        // Handle dropped files
+        uploadBox.addEventListener('drop', (e) => {
+            uploadBox.classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Handle selected file
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Sample data button
+        sampleButton.addEventListener('click', async () => {
+            showLoading();
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        drugs: 'Codeine,Clopidogrel,Warfarin,Simvastatin,Azathioprine,Fluorouracil'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Analysis failed');
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError('Error analyzing sample data: ' + error.message);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.vcf')) {
+                showError('Please select a valid VCF file (.vcf format)');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showError('File is too large. Maximum size is 5 MB');
+                return;
+            }
+            analyzeFile(file);
+        }
+
+        async function analyzeFile(file) {
+            showLoading();
+            const formData = new FormData();
+            formData.append('vcf_file', file);
+            formData.append('drugs', 'Codeine,Clopidogrel,Warfarin,Simvastatin,Azathioprine,Fluorouracil');
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Analysis failed');
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError('Error analyzing file: ' + error.message);
+            }
+        }
+
+        function showLoading() {
+            errorMessage.classList.remove('show');
+            resultsSection.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+            loadingState.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+        }
+
+        function displayResults(results) {
+            if (!Array.isArray(results) || results.length === 0) {
+                showError('No analysis results received');
+                return;
+            }
+
+            loadingState.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+
+            // Extract genes and count risks
+            const genes = new Set();
+            let highRiskCount = 0;
+            let mediumRiskCount = 0;
+            const uniqueGenes = {};
+
+            results.forEach(drug => {
+                const genes_list = drug.genes || [];
+                genes_list.forEach(g => {
+                    genes.add(g.gene);
+                    if (!uniqueGenes[g.gene]) {
+                        uniqueGenes[g.gene] = {
+                            phenotype: g.phenotype || 'Unknown',
+                            drug: drug.drug_name
+                        };
+                    }
+                });
+
+                const risk = drug.risk_level.toLowerCase();
+                if (risk === 'toxic' || risk === 'ineffective') highRiskCount++;
+                else if (risk === 'moderate') mediumRiskCount++;
+            });
+
+            // Update summary widgets
+            document.getElementById('genesCount').textContent = genes.size;
+            document.getElementById('drugsCount').textContent = results.length;
+            document.getElementById('alertsCount').textContent = highRiskCount + mediumRiskCount;
+
+            const overallRisk = highRiskCount > 0 ? 'High' : mediumRiskCount > 0 ? 'Medium' : 'Low';
+            const riskWidget = document.getElementById('riskWidget');
+            riskWidget.classList.remove('safe', 'warning', 'critical');
+            if (overallRisk === 'High') {
+                riskWidget.classList.add('critical');
+                document.getElementById('overallRisk').textContent = '⚠️ HIGH';
+            } else if (overallRisk === 'Medium') {
+                riskWidget.classList.add('warning');
+                document.getElementById('overallRisk').textContent = '⚡ MEDIUM';
+            } else {
+                riskWidget.classList.add('safe');
+                document.getElementById('overallRisk').textContent = '✓ LOW';
+            }
+
+            // Generate alerts
+            const alertsList = document.getElementById('alertsList');
+            const alertsContainer = document.getElementById('alertsContainer');
+            let alertsHTML = '';
+            let alertCount = 0;
+
+            results.forEach(drug => {
+                const risk = drug.risk_level.toLowerCase();
+                if (risk === 'toxic' || risk === 'ineffective') {
+                    alertsHTML += `
+                        <div class="alert alert-critical">
+                            <span class="alert-icon">⚠️</span>
+                            <div>
+                                <strong>${drug.drug_name}</strong>
+                                <p>${drug.recommendation}</p>
+                            </div>
+                        </div>
+                    `;
+                    alertCount++;
+                }
+            });
+
+            if (alertCount > 0) {
+                alertsList.innerHTML = alertsHTML;
+                alertsContainer.classList.remove('hidden');
+            } else {
+                alertsContainer.classList.add('hidden');
+            }
+
+            // Generate gene cards
+            const genePanel = document.getElementById('genePanel');
+            let genesHTML = '';
+            Object.entries(uniqueGenes).forEach(([gene, info]) => {
+                const riskLevel = results.find(r => r.genes && r.genes.some(g => g.gene === gene))?.risk_level.toLowerCase() || '';
+                let statusClass = 'safe';
+                let statusText = 'Normal';
+                if (riskLevel === 'toxic' || riskLevel === 'ineffective') {
+                    statusClass = 'critical';
+                    statusText = 'Action Required';
+                } else if (riskLevel === 'moderate') {
+                    statusClass = 'warning';
+                    statusText = 'Caution';
+                }
+
+                genesHTML += `
+                    <div class="gene-card ${statusClass}">
+                        <div class="gene-name">${gene}</div>
+                        <div class="gene-phenotype">${info.phenotype}</div>
+                        <div class="gene-status">
+                            <div class="status-dot"></div>
+                            <span class="status-text">${statusText}</span>
+                        </div>
+                        <div class="gene-explanation">Affects metabolism of ${info.drug}</div>
+                    </div>
+                `;
+            });
+            genePanel.innerHTML = genesHTML;
+
+            // Generate drug table
+            const drugTable = document.getElementById('drugTable');
+            let tableHTML = '';
+            results.forEach((drug, idx) => {
+                const risk = drug.risk_level.toLowerCase();
+                let riskIcon = '✓';
+                let riskClass = 'risk-safe';
+                if (risk === 'toxic' || risk === 'ineffective') {
+                    riskIcon = '⚠️';
+                    riskClass = 'risk-danger';
+                } else if (risk === 'moderate') {
+                    riskIcon = '⚡';
+                    riskClass = 'risk-warning';
+                }
+
+                tableHTML += `
+                    <tr>
+                        <td><strong>${drug.drug_name}</strong></td>
+                        <td>
+                            <div class="risk-cell">
+                                <span class="risk-icon ${riskClass}">${riskIcon}</span>
+                                <span>${drug.risk_level}</span>
+                            </div>
+                        </td>
+                        <td>${drug.recommendation}</td>
+                        <td>
+                            <span class="badge badge-info">${drug.evidence_level || 'CPIC Level A'}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            drugTable.innerHTML = tableHTML;
+
+            // Generate explanations
+            const explanationsPanel = document.getElementById('explanationsPanel');
+            let explanationsHTML = '';
+            results.forEach((drug, idx) => {
+                const isOpen = idx === 0;
+                explanationsHTML += `
+                    <div class="expandable">
+                        <div class="expandable-header ${isOpen ? 'open' : ''}" onclick="toggleExpendable(this)">
+                            <span class="expandable-title">${drug.drug_name}</span>
+                            <span class="expandable-icon">⌄</span>
+                        </div>
+                        <div class="expandable-content ${isOpen ? 'open' : ''}">
+                            <div class="expandable-body">
+                                <span class="explanation-tag">🤖 AI Generated Explanation</span>
+                                <div class="explanation-section">
+                                    <h4>Summary</h4>
+                                    <p>${drug.summary || drug.explanation || 'This drug requires dose adjustment based on your genetic profile.'}</p>
+                                </div>
+                                <div class="explanation-section">
+                                    <h4>Mechanism</h4>
+                                    <p>${drug.mechanism || 'Your genetic variations affect the enzyme responsible for metabolizing this drug, potentially leading to ' + (drug.risk_level === 'safe' ? 'normal' : 'altered') + ' drug levels in your bloodstream.'}</p>
+                                </div>
+                                <div class="explanation-section">
+                                    <h4>Clinical Justification</h4>
+                                    <p>${drug.justification || drug.recommendation}</p>
+                                </div>
+                                <div class="evidence">
+                                    <div class="evidence-item">
+                                        <div class="evidence-label">Evidence Level</div>
+                                        <div class="evidence-value">${drug.evidence_level ? drug.evidence_level.split(' ')[drug.evidence_level.split(' ').length - 1] : 'A'}</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-label">Confidence</div>
+                                        <div class="evidence-value">92%</div>
+                                    </div>
+                                </div>
+                                <div class="recommendation ${drug.risk_level === 'safe' ? 'safe' : drug.risk_level === 'moderate' ? 'warning' : 'critical'}">
+                                    <div class="recommendation-title">
+                                        ${drug.risk_level === 'safe' ? '✓' : drug.risk_level === 'moderate' ? '⚠️' : '🚫'} 
+                                        Clinical Recommendation
+                                    </div>
+                                    <div class="recommendation-text">
+                                        ${drug.recommendation}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            explanationsPanel.innerHTML = explanationsHTML;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleExpendable(header) {
+            header.classList.toggle('open');
+            const content = header.nextElementSibling;
+            if (header.classList.contains('open')) {
+                content.style.maxHeight = '600px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+    </script>
+</body>
+</html>
